@@ -28,6 +28,13 @@ struct ListNode {
     ListNode(int x) : val(x), next(NULL) {}
 };
 
+struct TreeNode {
+    int val;
+    TreeNode *left;     
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+};
+
 void gameOfLife(vector<vector<int>>& board) {
     int M = board[0].size(); // 行
     int N = board.size();    // 列
@@ -405,6 +412,28 @@ ListNode* reverseList(ListNode* head) {
         cur = tmp;
     }
     return pre;
+}
+
+// 剑指 Offer 06. 从尾到头打印链表
+vector<int> reversePrint(ListNode* head) {
+
+    ListNode* pre = nullptr;
+    ListNode* curr = head;
+
+    while (curr) {
+        ListNode* temp = curr->next;
+        curr->next = pre;
+        pre = curr;
+        curr = temp;
+    }
+
+    vector<int> ans;
+    while (pre)
+    {
+        ans.push_back(pre->val);
+        pre = pre->next;
+    }
+    return ans;
 }
 
 void rotate(vector<vector<int>>& matrix) {
@@ -1590,6 +1619,269 @@ ListNode* mergeKLists(vector<ListNode*>& lists) {
     return res;
 }
 
+// 328. 奇偶链表
+ListNode* oddEvenList(ListNode* head) {
+    if (!head) return head;
+
+    ListNode* evenHead = head->next;
+    ListNode* odd = head;
+    ListNode* even = evenHead;
+
+    while (even && even->next)
+    {
+        odd->next = even->next;
+        odd = odd->next;
+        even->next = odd->next;
+        even = even->next;
+    }
+    odd->next = evenHead;
+    return head;
+}
+
+// 406. 根据身高重建队列
+vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
+    std::sort(people.begin(), people.end(), [](const vector<int>& a, const vector<int>& b) {
+        return (a[0] > b[0]) || (a[0] == b[0] && a[1] < b[1]);
+    });
+    vector<vector<int>> res;
+    for (auto person : people) {
+        res.insert(res.begin() + person[1], person);
+    }
+    return res;
+}
+
+// 剑指 Offer 03. 数组中重复的数字
+int findRepeatNumber(vector<int>& nums) {
+    set<int> numsSet;
+
+    for (auto n : nums) {
+        auto it = numsSet.find(n);
+        if (it != numsSet.end()) {
+            return n;
+        } else {
+            numsSet.insert(n);
+        }
+    }
+    return 0;
+}
+
+// 剑指 Offer 07. 重建二叉树
+TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+    if (preorder.size() == 0) return NULL; 
+    TreeNode* root = new TreeNode(preorder[0]);
+    if (preorder.size() == 1) return root;
+
+    vector<int> leftInorder;
+    vector<int> rightInorder;
+    bool isLeft = true;
+    for (auto i : inorder) {
+        if (i == root->val) {
+            isLeft = false;
+        } else {
+            if (isLeft) {
+                leftInorder.push_back(i);
+            } else {
+                rightInorder.push_back(i);
+            }
+        }
+    }
+
+    vector<int> leftPreorder;
+    vector<int> rightPreorder;
+    isLeft = leftInorder.size() == 0 ? false : true;
+    for (int p = 1; p < preorder.size(); p++) {
+        if (isLeft) {
+            leftPreorder.push_back(preorder[p]);
+            if (p == leftInorder.size()) {
+                isLeft = false;
+            }
+        } else {
+            rightPreorder.push_back(preorder[p]);
+        }
+    }
+
+    root->left = buildTree(leftPreorder, leftInorder);
+    root->right = buildTree(rightPreorder, rightInorder);
+
+    return root;
+}
+
+
+// 剑指 Offer 47. 礼物的最大价值
+int maxValue(vector<vector<int>>& grid) {
+    int M = grid.size();
+    if (M == 0) return 0;
+    int N = grid[0].size();
+    if (N == 0) return 0;
+
+    vector<vector<int>> cache(M, vector<int>(N, 0));
+
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j++) {
+            int up = 0; int left = 0;
+            if (i > 0) left = cache[i - 1][j];
+            if (j > 0) up = cache[i][j - 1];
+            cache[i][j] = max(left, up) + grid[i][j];
+        }
+    }
+
+    return cache[M - 1][N - 1];
+}
+
+// 剑指 Offer 27. 二叉树的镜像
+TreeNode* mirrorTree(TreeNode* root) {
+    if (!root) return NULL;
+    if (root->left || root->right) {
+        TreeNode* temp = root->left;
+        root->left = root->right;
+        root->right = temp;
+    }
+
+    if (root->left) mirrorTree(root->left);
+    if (root->right) mirrorTree(root->right);
+
+    return root;
+}
+
+bool isChildrenSymmetric(TreeNode* left, TreeNode* right) {
+
+    if (left) {
+        if (right) {
+            if (left->val != right->val) return false;
+            return isChildrenSymmetric(left->left, right->right) && isChildrenSymmetric(left->right, right->left);
+        } else { 
+            return false;
+        }
+    } else {
+        return right == nullptr ? true : false;
+    }
+}
+
+// 剑指 Offer 28. 对称的二叉树
+bool isSymmetric(TreeNode* root) {
+    if (!root) return true;
+    return isChildrenSymmetric(root->left, root->right);
+}
+
+// 1030. 距离顺序排列矩阵单元格
+vector<vector<int>> allCellsDistOrder(int R, int C, int r0, int c0) {
+
+    vector<vector<int>> ans;
+    vector<vector<int>> record(R, vector<int>(C, 0));
+    queue<Coordinate> coords;
+    coords.push({r0, c0});
+
+    int dx[] = {0, -1, 0, 1};
+    int dy[] = {-1, 0, 1, 0};
+
+    while (!coords.empty())
+    {
+        auto coord = coords.front();
+        coords.pop();
+        if (record[coord.x][coord.y]) continue; 
+        ans.push_back({coord.x, coord.y});
+        record[coord.x][coord.y] = 1;
+
+        for (int i = 0; i < 4; i++) {
+            int nx = coord.x + dx[i];
+            int ny = coord.y + dy[i];
+            if (nx < 0 || nx > R - 1 || ny < 0 || ny > C - 1) continue;
+            coords.push({nx, ny});
+        }
+    }
+    
+    return ans;
+}
+
+// 134 加油站  
+int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+
+    for (int i = 0; i < gas.size(); i++) {
+        if (gas[i] < cost[i]) continue;
+        int curr = i;
+        int end = curr == 0 ? gas.size() - 1 : curr - 1;
+        int totle = gas[curr];
+        int can = true;                       
+
+        while (curr != end) {
+            if (totle >= cost[curr]) {
+                totle -= cost[curr];
+                if (curr == cost.size() - 1) {
+                    curr = 0;
+                } else {
+                    curr++;
+                }
+                totle += gas[curr];
+
+            } else {
+                can = false;
+                break;
+            } 
+        }
+
+        if (can && totle >= cost[end]) return i;
+    }
+    
+    return -1;
+}
+
+// 283. 移动零
+void moveZeroes(vector<int>& nums) {
+    bool hasZero = false;
+    int index = 0;
+    for (int i = 0; i < nums.size(); i++) {
+        if (nums[i] == 0) {
+            if (!hasZero) {
+                hasZero = true;
+                index = i;
+            }
+        } else {
+            if (hasZero) {
+                int temp = nums[i];
+                nums[i] = nums[index];
+                nums[index] = temp;
+                index++;
+            }
+        }
+    }
+}
+
+// 先序遍历
+vector<int> preorderTraversal(TreeNode* root) {
+    vector<int> res;
+    stack<TreeNode*> m_stk;
+    TreeNode* node = root;
+
+    while (!m_stk.empty() || node != nullptr) {
+
+        while (node)
+        {
+            res.push_back(node->val);
+            m_stk.emplace(node);
+            node = node->left;
+        }
+        node = m_stk.top();
+        m_stk.pop();
+        node = node->right;
+    }
+
+    return res;
+}
+
+// 面试题 02.07. 链表相交
+ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+    auto tempA = headA;
+    auto tempB = headB;
+
+    while (tempA != tempB) {
+        tempA = tempA == nullptr ? headB : tempA->next;
+        tempB = tempB == nullptr ? headA : tempB->next;
+    }
+
+    return tempA;
+}
+
 int main(int argc, char** argv) {
 
+    return 0;
 }
