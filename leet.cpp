@@ -143,7 +143,7 @@ int maximalRectangle(vector<vector<char>>& matrix) {
 }
 
 
-
+// 84. 柱状图中最大的矩形
 int largestRectangleArea(vector<int>& heights) {
 
     int N = heights.size();
@@ -259,6 +259,7 @@ vector<vector<string>> solveNQueens(int n) {
 
 int zero = '0';
 
+// 37. 解数独
 bool sudoKubackstrack(vector<vector<char>>& board, deque<Coordinate>& rc,
     vector<int>& row, vector<int>& col, vector<int>& gong) {
 
@@ -358,6 +359,7 @@ int myAtoi(string str) {
     return ans;
 }
 
+// 42. 接雨水
 int trap(vector<int>& height) {
 
     int N = height.size();
@@ -436,6 +438,7 @@ vector<int> reversePrint(ListNode* head) {
     return ans;
 }
 
+// 面试题 01.07. 旋转矩阵
 void rotate(vector<vector<int>>& matrix) {
 
     int M = 0;
@@ -837,6 +840,7 @@ vector<vector<int>> subsets(vector<int>& nums) {
     return ans;
 }
 
+// 200. 岛屿数量
 int numIslands(vector<vector<char>>& grid) {
     
     int N = grid.size();
