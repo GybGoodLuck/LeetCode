@@ -633,7 +633,6 @@ string reverseWords(string s) {
         }
     }
 
-    cout << temp << endl;
     if (temp.size() > 0) cache.push_back(temp);
 
     for (int i = cache.size() - 1; i >= 0; i--) {
@@ -1885,7 +1884,207 @@ ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
     return tempA;
 }
 
-int main(int argc, char** argv) {
+// 147. 对链表进行插入排序
+ListNode* insertionSortList(ListNode* head) {
 
+    auto curr = head;
+    
+    while (curr)
+    {
+        cout << curr->val << endl;
+        if (curr->next && curr->next->val < curr->val) {
+            auto temp = curr->next;
+            curr->next = curr->next->next;
+            auto node = head;
+            if (temp->val < node->val) {
+                temp->next = node;
+                head = temp;
+            } else {
+                while (temp->val >= node->next->val)
+                {
+                    node = node->next;
+                }
+                temp->next = node->next;
+                node->next = temp;
+            }
+        } else {
+            curr = curr->next;
+        }
+    }
+    
+    return head;
+}
+
+// 剑指 Offer 56 - I. 数组中数字出现的次数
+vector<int> singleNumbers(vector<int>& nums) {
+    int ret = 0;
+    for (int n : nums)
+        ret ^= n;
+    int div = 1;
+    while ((div & ret) == 0)
+        div <<= 1;
+    int a = 0, b = 0;
+    for (int n : nums)
+        if (div & n)
+            a ^= n;
+        else
+            b ^= n;
+    return vector<int>{a, b};
+}
+
+// 452. 用最少数量的箭引爆气球
+int findMinArrowShots(vector<vector<int>>& points) {
+
+    if (points.size() == 0) {
+        return 0;
+    }
+
+    sort(points.begin(), points.end(), [](const vector<int>& u, const vector<int>& v) {
+        return u[1] < v[1];
+    });
+
+    int res = 1;
+    int edge = points[0][1];
+    for (auto point : points) {
+        if (point[0] > edge) {
+            edge = point[1];
+            res++;
+        }
+    }
+
+    return res;
+}
+
+// 70. 爬楼梯
+map<int, int> climbCaches;
+int climbStairs(int n) {
+    if (n <= 0) return 0;
+    if (n == 1) return 1;
+    if (n == 2) return 2;
+
+    auto it = climbCaches.find(n);
+    if (it != climbCaches.end()) {
+        return it->second;
+    } else {
+        int ans =  climbStairs(n - 1) + climbStairs(n - 2);
+        climbCaches.insert({n, ans});
+        return ans;
+    }
+}
+
+// 面试题 08.01. 三步问题
+int waysToStep(int n) {
+
+    if (n <= 2) {
+        return n;
+    }
+    if (n == 3) {
+        return 4;
+    }
+
+    vector<long> dp(n + 1, 0);
+    dp[1] = 1;
+    dp[2] = 2;
+    dp[3] = 4;
+    for (int i = 4; i <= n; i++) {
+        dp[i] = (dp[i - 1] + dp[i - 2] + dp[i - 3]) % 1000000007;
+    }
+
+    return (int)dp[n];
+}
+
+// 222. 完全二叉树的节点个数
+int countNodes(TreeNode* root) {
+    if (!root) return 0;
+
+    int ans = 1;
+    if (root->left) ans = ans + countNodes(root->left);
+    if (root->right) ans = ans + countNodes(root->right);
+
+    return ans;
+}
+
+// 剑指 Offer 25. 合并两个排序的链表
+ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+
+    auto curr1 = l1;
+    auto curr2 = l2;
+    ListNode* ans = nullptr;
+    ListNode* currAns = nullptr;
+
+    while (curr1 || curr2)
+    {
+        if (!curr2 || (curr1 && curr1->val <= curr2->val)) {
+            if (!ans) {
+                ans = curr1;
+                currAns = ans;
+            } else {
+                currAns->next = curr1;
+                currAns = currAns->next;
+            }
+            curr1 = curr1->next;
+        } else if (!curr1 || (curr2 && curr1->val > curr2->val)) {
+            if (!ans) {
+                ans = curr2;
+                currAns = ans;
+            } else {
+                currAns->next = curr2;
+                currAns = currAns->next;
+            }
+            curr2 = curr2->next;
+        }
+    }
+    return ans;
+}
+
+// 剑指 Offer 31. 栈的压入、弹出序列
+bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {
+    
+    stack<int> help;
+    int pos = 0;
+
+    for (int i = 0; i < pushed.size(); i++) {
+        help.push(pushed[i]);
+        while (pos < popped.size() && !help.empty() && popped[pos] == help.top()) {
+            help.pop();
+            pos++;
+        }
+    }
+
+    return help.empty();
+}
+
+// 1370. 上升下降字符串
+string sortString(string s) {
+
+    string ans;
+    vector<int> barrel(26, 0);
+
+    for (auto c : s) {
+        barrel[c - 'a']++;
+    }
+
+    bool end = false;
+    while (!end) {
+        end = true;
+        for (int i = 0; i < 26; i++) {
+            if (barrel[i] > 0) {
+                ans.push_back(i + 'a');
+                if (barrel[i]-- > 0) end = false;
+            }
+        }
+        for (int i = 25; i >= 0; i--) {
+            if (barrel[i] > 0) {
+                ans.push_back(i + 'a');
+                if (barrel[i]-- > 0) end = false;
+            }
+        }
+    }
+
+    return ans;
+}
+
+int main(int argc, char** argv) {
+    std::cout << sortString("leetcode") << std::endl;
     return 0;
 }
