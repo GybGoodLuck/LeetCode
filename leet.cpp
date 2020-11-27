@@ -2084,7 +2084,285 @@ string sortString(string s) {
     return ans;
 }
 
+// 164. 最大间距
+int maximumGap(vector<int>& nums) {
+
+    int n = nums.size();
+    if (n < 2) {
+        return 0;
+    }
+    int minVal = *min_element(nums.begin(), nums.end());
+    int maxVal = *max_element(nums.begin(), nums.end());
+    int d = max(1, (maxVal - minVal) / (n - 1));
+    int bucketSize = (maxVal - minVal) / d + 1;
+
+    vector<pair<int, int>> bucket(bucketSize, {-1, -1});  // 存储 (桶内最小值，桶内最大值) 对，(-1, -1) 表示该桶是空的
+    for (int i = 0; i < n; i++) {
+        int idx = (nums[i] - minVal) / d;
+        if (bucket[idx].first == -1) {
+            bucket[idx].first = bucket[idx].second = nums[i];
+        } else {
+            bucket[idx].first = min(bucket[idx].first, nums[i]);
+            bucket[idx].second = max(bucket[idx].second, nums[i]);
+        }
+    }
+
+    int ret = 0;
+    int prev = -1;
+    for (int i = 0; i < bucketSize; i++) {
+        if (bucket[i].first == -1) continue;
+        if (prev != -1) {
+            ret = max(ret, bucket[i].first - bucket[prev].second);
+        }
+        prev = i;
+    }
+    return ret;
+}
+
+// 剑指 Offer 59 - I. 滑动窗口的最大值
+vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+
+    vector<int> ans;
+    if (k == 0 || nums.size() < k) return ans;
+    
+    int index = 0;
+    for (int i = 0; i < nums.size() - k + 1; i++) {
+        int max = nums[i];
+        if (i != 0 && i < index) {
+            if (nums[i + k - 1] >= nums[index]) {
+                index = i + k - 1;
+            }
+        } else {
+            for (int j = i; j < i + k; j++) {
+                if (nums[j] >= max) {
+                    index = j;
+                    max = nums[index];
+                }
+            }
+        }
+        max = nums[index];
+        ans.push_back(max);
+    }
+
+    return ans;
+}
+
+// 剑指 Offer 10- I. 斐波那契数列
+int fib(int n) {
+
+    if (n == 0) return 0;
+    if (n == 1) return 1;
+    if (n == 2) return 1;
+
+    int cache[n + 1];
+    cache[0] = 0;
+    cache[1] = 1;
+    cache[2] = 1;
+
+    for (int i = 3; i <= n; i++) {
+        cache[i] = (cache[i - 1] + cache[i - 2]) % 1000000007;
+    }
+
+    return cache[n];
+}
+
+// 剑指 Offer 04. 二维数组中的查找
+bool findNumberIn2DArray(vector<vector<int>>& matrix, int target) {
+
+    int N = matrix.size();
+    if (N == 0) return false;
+    int M = matrix[0].size();
+    if (M == 0) return false;
+    
+    queue<int> ns;
+    for (int n = 0; n < N; n++) {
+        int start = matrix[n][0]; int end = matrix[n][M - 1];
+        if (start == target || end == target)
+            return true;
+        else if (start < target && end > target)
+            ns.push(n);
+        else if (start > target) 
+            break;
+    }
+
+    while (!ns.empty())
+    {
+        int n = ns.front();
+        ns.pop();
+        for (int m = 1; m < M - 1; m++) {
+            int temp = matrix[n][m];
+            if (temp == target) {
+                return true;
+            } else if (temp > target) {
+                break;
+            }
+        }
+    }
+
+    return false;
+}
+
+// 剑指 Offer 11. 旋转数组的最小数字
+int minArray(vector<int>& numbers) {
+    
+    int start = 0;
+    int end = numbers.size() - 1;
+
+    while (start < end) {
+        int helf = start + (end - start) / 2;
+        if (numbers[helf] < numbers[end]) {
+            end = helf;
+        } else if (numbers[helf] > numbers[end]) {
+            start = helf + 1;
+        } else {
+            end--;
+        }
+    }
+    return numbers[start];
+}
+
+// 剑指 Offer 12. 矩阵中的路径
+bool exist(vector<vector<char>>& board, string word) {
+
+    if (word.size() == 0) return false;
+
+    stack<Coordinate> que;
+
+    int N = board.size();
+    int M = board[0].size();
+
+    que.push({-1, -1});
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            if (board[i][j] == word[0]) {
+                if (word.size() == 1) return true;
+                que.push({i, j});
+            }
+        }
+    }
+
+    int dx[] = {0, -1, 0, 1};
+    int dy[] = {-1, 0, 1, 0};
+
+    int index = 1;
+    stack<Coordinate> visited;
+    visited.push({-1, -1});
+    vector<vector<int>> vs(N, vector<int>(M, 0));
+
+    while (!que.empty())
+    {
+        auto coord = que.top();
+        que.pop();
+        if(que.empty()) return false;
+
+        if (coord.x == -1 && coord.y == -1) {
+            index--;
+            auto vd = visited.top();
+            visited.pop();
+            vs[vd.x][vd.y] = 0;
+            continue;
+        }
+
+        bool has = false;
+        que.push({-1, -1});
+        for (int j = 0; j < 4; j++) {
+            int nx = coord.x + dx[j];
+            int ny = coord.y + dy[j];
+
+            if (nx < 0 || nx >= N || ny < 0 || ny >= M) continue;
+            if (vs[nx][ny] == 0 && board[nx][ny] == word[index]) {
+                que.push({nx, ny});
+                has = true;
+            }
+        }
+        if (has) {
+            if (index == word.size() - 1) return true;
+            index++;
+            visited.push({coord.x, coord.y});
+            vs[coord.x][coord.y] = 1;
+        } else {
+            que.pop();
+        }
+    }
+    
+    return false;
+}
+
+bool backTrackExist(const vector<vector<char>>& board, const string& word, const Coordinate& coord, vector<vector<int>>& visited, int index) {
+
+    if (index == word.size()) {
+        return true;
+    }
+
+    int N = board.size();
+    int M = board[0].size();
+    int dx[] = {0, -1, 0, 1};
+    int dy[] = {-1, 0, 1, 0};
+
+    visited[coord.x][coord.y] = 1;
+    for (int j = 0; j < 4; j++) {
+        int nx = coord.x + dx[j];
+        int ny = coord.y + dy[j];
+
+        if (nx < 0 || nx >= N || ny < 0 || ny >= M) continue;
+        if (visited[nx][ny] == 0 && board[nx][ny] == word[index]) {
+            index++;
+            if (backTrackExist(board, word, {nx, ny}, visited, index)) return true;
+            index--;
+        }
+    }
+    visited[coord.x][coord.y] = 0;
+
+    return false;
+}
+
+// 剑指 Offer 12. 矩阵中的路径
+bool exist1(vector<vector<char>>& board, string word) {
+    if (word.size() == 0) return false;
+
+    queue<Coordinate> que;
+
+    int N = board.size();
+    int M = board[0].size();
+    vector<vector<int>> visited(N, vector<int>(M, 0));
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            if (board[i][j] == word[0]) {
+                if (word.size() == 1) return true;
+                if (backTrackExist(board, word, {i, j}, visited, 1)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+// 454. 四数相加 II
+int fourSumCount(vector<int>& A, vector<int>& B, vector<int>& C, vector<int>& D) {
+
+    int N = A.size();
+    unordered_map<int, int> map; 
+    int res = 0;
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            map[A[i] + B[j]]++;
+        }
+    }
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            res += map[-C[i] - D[j]];
+        }
+    }
+
+    return res;
+}
+
 int main(int argc, char** argv) {
-    std::cout << sortString("leetcode") << std::endl;
+
     return 0;
 }
