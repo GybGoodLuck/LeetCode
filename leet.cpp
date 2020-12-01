@@ -2362,7 +2362,125 @@ int fourSumCount(vector<int>& A, vector<int>& B, vector<int>& C, vector<int>& D)
     return res;
 }
 
-int main(int argc, char** argv) {
+// 剑指 Offer 14- I. 剪绳子
+int cuttingRope(int n) {
+    if (n <= 3) return n - 1;
 
+    int res = 1;
+    while (n > 4) {
+        n = n - 3;
+        res *= 3;
+    }
+    return res * n;
+}
+
+bool isTreeEqual(TreeNode* A, TreeNode* B) {
+
+    if (A == nullptr && B == nullptr) return true;
+    if (A != nullptr && B == nullptr) return true;
+    if (A == nullptr && B != nullptr) return false;
+
+    auto currA = A;
+    auto currB = B;
+
+    if (currA->val == currB->val) {
+        return isTreeEqual(currA->left, currB->left) && isTreeEqual(currA->right, currB->right);
+    } else {
+        return false;
+    }
+}
+
+// 剑指 Offer 26. 树的子结构
+bool isSubStructure(TreeNode* A, TreeNode* B) {
+
+    if (B == nullptr) return false;
+
+    stack<TreeNode*> sk;
+
+    auto curr = A;
+
+    while (!sk.empty() || curr != nullptr) {
+        while (curr) {
+            if (curr->val == B->val) {
+                if (isTreeEqual(curr, B)) return true;
+            }
+            sk.emplace(curr);
+            curr = curr->left;
+        }
+        curr = sk.top();
+        sk.pop();
+        curr = curr->right;
+    }
+
+    return false;
+}
+
+// 767. 重构字符串
+string reorganizeString(string S) {
+
+    int N = S.size();
+    if (N <= 2) return S; 
+
+    int nums[26] = {0};
+    int maxNum = 0;
+
+    for (auto c : S) {  
+        maxNum = std::max(++nums[c - 'a'], maxNum);
+    }
+
+    string ans;
+    if (maxNum > (N + 1) / 2) return ans;
+
+    priority_queue<std::pair<int, char>> que;
+
+    for (int i = 0; i < 26; i++) {
+        if (nums[i] > 0) {
+            que.push({nums[i], i + 'a'});
+        }
+    }
+  
+    std::pair<int, char> p1 = {0, 'a'};
+    std::pair<int, char> p2 = {0, 'a'};
+
+    while (que.size() > 1) {
+        auto p1 = que.top(); que.pop();
+        auto p2 = que.top(); que.pop();
+        
+        while (p2.first != 0) {
+            ans.push_back(p1.second);
+            p1.first--;
+            ans.push_back(p2.second);
+            p2.first--;
+        }
+
+        if (p1.first > 0) {
+            que.push(p1);
+        }
+    }
+
+    if (!que.empty()) ans.push_back(que.top().second);
+
+    return ans;
+}
+
+// 34. 在排序数组中查找元素的第一个和最后一个位置
+vector<int> searchRange(vector<int>& nums, int target) {
+
+    vector<int> ans(2, -1);
+
+    for (int i = 0; i < nums.size(); i++) {
+        if (nums[i] > target) return ans;
+        if (nums[i] == target) {
+            if (ans[0] == -1) {
+                ans[0] = i;
+            }
+            ans[1] = i;
+        }
+    }
+
+    return ans;
+}
+
+int main(int argc, char** argv) {
     return 0;
 }
