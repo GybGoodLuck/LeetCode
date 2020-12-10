@@ -2481,6 +2481,236 @@ vector<int> searchRange(vector<int>& nums, int target) {
     return ans;
 }
 
+vector<int> composeStack(const vector<int>& nums, int k) {
+
+    int N = nums.size();
+    vector<int> stack(k, 0);
+
+    int remain = N - k;
+    int top = -1;
+
+    for (int i = 0; i < N; i++) {
+        auto num = nums[i];
+
+        while (top >= 0 && stack[top] < num && remain > 0) {
+            top--;
+            remain--;
+        }
+
+        if (top < k - 1) {
+            stack[++top] = num;
+        } else {
+            remain--;
+        }
+    }
+
+    return stack;  
+}
+
+void maxNumber(vector<int>& nums1, vector<int>& nums2, int k) {
+
+    int N1 = nums1.size();
+    int N2 = nums2.size();
+
+    vector<int> ans;
+
+    int start = std::max(0, k - N2);
+    int end = std::min(N1, k);
+
+    for (int i = start; i <= end; i++) {
+        auto stk1 = composeStack(nums1, i);
+        auto stk2 = composeStack(nums2, k - i);
+    }
+}
+
+// 204. 计数质数
+int countPrimes(int n) {
+    vector<int> isPrime(n, 1);
+    int ans = 0;
+    for (int i = 2; i < n; i++) {
+        if (isPrime[i]) {
+            ans++;
+            long long si = (long long)i * i;
+            if (si < n) {
+                for (int j = si; j < n; j += i) {
+                    isPrime[j] = 0;
+                }
+            }
+        }
+    }
+    return ans;
+}
+
+// 861. 翻转矩阵后的得分
+int matrixScore(vector<vector<int>>& A) {
+
+    int N = A.size();
+    int M = A[0].size();
+
+    for (int i = 0; i < N; i++) {
+        if (A[i][0] == 0) {
+            for (int j = 0; j < M; j++) {
+                A[i][j] = A[i][j] == 0 ? 1 : 0;
+            }
+        }
+    }
+
+    int ret = N * (1 << (M - 1));
+
+    for (int j = 1; j < M; j++) { 
+        int count = 0;
+        for (int i = 0; i < N; i++) {
+            if (A[i][j] == 1) count++;
+            else count --;
+        }
+        
+        for (int i2 = 0; i2 < N; i2++) {
+            if (count < 0) {
+                A[i2][j] = A[i2][j] == 0 ? 1 : 0;
+            }
+            if (A[i2][j]) ret += 1 << (M - j - 1);
+        }
+    }
+
+    return ret;
+}
+
+// 62. 不同路径
+int uniquePaths(int m, int n) {
+    long long ans = 1;
+    for (int x = n, y = 1; y < m; ++x, ++y) {
+        ans = ans * x / y;
+    }
+    return ans;
+}
+
+// 860. 柠檬水找零
+bool lemonadeChange(vector<int>& bills) {
+
+    int num5 = 0;
+    int num10 = 0;
+
+    for (auto bill : bills) {
+        if (bill == 5) {
+            num5++;
+        }
+        if (bill == 10) {
+            if (num5 == 0) {
+                return false;
+            } else {
+                num10++;
+                num5--;
+            }
+        }
+        if (bill == 20) {
+            if (num5 == 0) {
+                return false;
+            } else {
+                if (num10 == 0) {
+                    if (num5 < 3) return false;
+                    else num5 = num5 - 3;
+                } else {
+                    num5--;
+                    num10--;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+// 剑指 Offer 21. 调整数组顺序使奇数位于偶数前面
+vector<int> exchange(vector<int>& nums) {
+
+    int start = 0;
+    int end = nums.size() - 1;
+
+    while (start < end) {
+        while (nums[start] % 2 != 0 && start < end) {
+            start++;
+        }
+        while (nums[end] % 2 == 0 && start < end) {
+            end--;
+        }
+        if (start < end) {
+            int temp = nums[start];
+            nums[start] = nums[end];
+            nums[end] = temp;
+            start++;
+            end--;
+        }
+    }
+
+    return nums;
+}
+
+// 剑指 Offer 15. 二进制中1的个数
+int hammingWeight(uint32_t n) {
+    int num = 0;
+
+    while (n) {
+        if (n & 1) num++;
+        n >>= 1;
+    }
+
+    return num;
+}
+
+// 剑指 Offer 32 - III. 从上到下打印二叉树 III
+vector<vector<int>> levelOrder(TreeNode* root) {
+    vector<vector<int>> ans;
+    deque<TreeNode*> deq;
+    if (!root) return ans;
+    deq.push_back(root);
+
+    bool flag = true;
+
+    while(!deq.empty()) {
+        vector<int> level;
+        int size =  deq.size();
+        TreeNode* node;
+        for (int i = 0; i < size; i++) {
+            if (flag) {
+                node = deq.front(); deq.pop_front();
+                if (node->left) deq.push_back(node->left);
+                if (node->right) deq.push_back(node->right);
+            } else {
+                node = deq.back(); deq.pop_back();
+                if (node->right) deq.push_front(node->right);
+                if (node->left) deq.push_front(node->left);
+            }
+            level.push_back(node->val);
+        }
+        flag = !flag;
+        ans.push_back(level);
+    }
+
+    return ans;
+}
+
+//剑指 Offer 55 - I. 二叉树的深度
+int maxDepth(TreeNode* root) {
+    if (!root) return 0;
+    return 1 + std::max(maxDepth(root->left), maxDepth(root->right));
+}
+
+// 剑指 Offer 42. 连续子数组的最大和
+int maxSubArray(vector<int>& nums) {
+    int max = nums[0];
+    int curr = nums[0];
+    for (int i = 1; i < nums.size(); i++) {
+        if (curr <= 0) {
+            curr = nums[i];
+        } else {
+            curr += nums[i];
+        }
+        max = std::max(curr, max);
+    } 
+    return max;
+}
+
+
 int main(int argc, char** argv) {
     return 0;
 }
